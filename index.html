@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mambo Finance - Smart Loan Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="auth-page">
+    <div
+      id="appStatus"
+      class="app-status is-info"
+      role="status"
+      aria-live="polite"
+    >
+      Checking app connection...
+    </div>
+
+    <main class="auth-layout">
+      <section class="brand-panel">
+        <p class="eyebrow">Mambo Finance</p>
+        <h1>Track loans professionally in Zambian Kwacha.</h1>
+        <p class="brand-copy">
+          Manage borrowing, monitor payments, and keep every loan detail in one
+          secure dashboard.
+        </p>
+        <ul class="brand-points">
+          <li>Real-time loan portfolio updates</li>
+          <li>Fast payment tracking and history</li>
+          <li>Clear status summaries for better decisions</li>
+        </ul>
+      </section>
+
+      <section class="auth-container" id="authContainer">
+        <div class="auth-tabs">
+          <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+          <button class="tab-btn" onclick="switchTab('register')">Register</button>
+        </div>
+
+        <div id="loginForm" class="auth-form active">
+          <h2>Welcome back</h2>
+          <p class="form-subtitle">Sign in to continue to your loan dashboard.</p>
+          <input type="email" id="loginEmail" placeholder="Email" required />
+          <div class="password-field">
+            <input
+              type="password"
+              id="loginPassword"
+              placeholder="Password"
+              required
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              onclick="togglePassword('loginPassword', this)"
+              aria-label="Show password"
+            >
+              <span class="eye-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+          <button
+            type="button"
+            class="forgot-password-btn"
+            onclick="forgotPassword()"
+          >
+            Forgot password?
+          </button>
+          <button onclick="login()">Sign In</button>
+          <div class="form-divider"><span>or</span></div>
+          <button onclick="loginWithGoogle()" class="google-btn">Continue with Google</button>
+          <div id="loginError" class="error-message"></div>
+        </div>
+
+        <div id="registerForm" class="auth-form">
+          <h2>Create account</h2>
+          <p class="form-subtitle">Set up your profile and start tracking loans.</p>
+          <input
+            type="text"
+            id="registerName"
+            placeholder="Full Name"
+            required
+          />
+          <input type="email" id="registerEmail" placeholder="Email" required />
+          <div class="password-field">
+            <input
+              type="password"
+              id="registerPassword"
+              placeholder="Password (min 6 characters)"
+              required
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              onclick="togglePassword('registerPassword', this)"
+              aria-label="Show password"
+            >
+              <span class="eye-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+          <button onclick="register()">Create Account</button>
+          <div id="registerError" class="error-message"></div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

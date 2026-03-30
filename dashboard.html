@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Money Lending Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="dashboard-page">
+    <div
+      id="appStatus"
+      class="app-status is-info"
+      role="status"
+      aria-live="polite"
+    >
+      Checking app connection...
+    </div>
+    <div class="dashboard">
+      <nav class="navbar">
+        <div class="nav-brand-wrap">
+          <h1>Money Lending Management</h1>
+          <p class="nav-subtitle">Small business loan tracking</p>
+        </div>
+        <div class="nav-links">
+          <button
+            class="nav-link-btn"
+            id="tabDashboard"
+            type="button"
+            onclick="switchDashboardSection('dashboard')"
+          >
+            Dashboard
+          </button>
+          <button
+            class="nav-link-btn active"
+            id="tabBorrowers"
+            type="button"
+            onclick="switchDashboardSection('borrowers')"
+          >
+            Borrowers
+          </button>
+          <button
+            class="nav-link-btn"
+            id="tabReports"
+            type="button"
+            onclick="switchDashboardSection('reports')"
+          >
+            Reports
+          </button>
+          <button onclick="logout()" class="logout-btn">Logout</button>
+        </div>
+      </nav>
+
+      <div class="dashboard-content">
+        <section id="sectionDashboard" class="panel-section hidden-section">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <h3>Total Borrowers</h3>
+              <p id="statTotalBorrowers">0</p>
+            </div>
+            <div class="stat-card">
+              <h3>Pending Loans</h3>
+              <p id="statPendingBorrowers">0</p>
+            </div>
+            <div class="stat-card">
+              <h3>Total Borrowed</h3>
+              <p id="statTotalBorrowed">K0.00</p>
+            </div>
+            <div class="stat-card">
+              <h3>Expected Collection</h3>
+              <p id="statTotalExpected">K0.00</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="sectionBorrowers" class="panel-section">
+          <section class="add-loan-section">
+          <h2>Borrowers</h2>
+          <div class="borrower-form-grid">
+            <input type="text" id="borrowerName" placeholder="Full Name" required />
+            <input
+              type="text"
+              id="borrowerNrc"
+              placeholder="NRC Number"
+              required
+            />
+            <input
+              type="text"
+              id="borrowerAddress"
+              placeholder="Residential Address"
+              required
+            />
+            <input
+              type="text"
+              id="borrowerPhone"
+              placeholder="Phone Number"
+              required
+            />
+            <input type="email" id="borrowerEmail" placeholder="Email Address" required />
+            <input
+              type="number"
+              id="amountBorrowed"
+              placeholder="Loan Amount (ZMW)"
+              step="0.01"
+              required
+            />
+            <input
+              type="number"
+              id="interestPercentage"
+              placeholder="Interest Rate (%)"
+              step="0.01"
+              required
+            />
+            <input
+              type="date"
+              id="dateBorrowed"
+              required
+            />
+            <input type="date" id="dueDate" required />
+            <input
+              type="text"
+              id="interestAmount"
+              placeholder="Interest Amount (Auto)"
+              readonly
+            />
+            <input
+              type="text"
+              id="totalToPay"
+              placeholder="Total to Pay Back (Auto)"
+              readonly
+            />
+          </div>
+          <div class="borrower-form-actions">
+            <button onclick="saveBorrower()" id="saveBorrowerBtn">Add Borrower</button>
+            <button onclick="clearBorrowerForm()" class="secondary-btn" type="button">
+              Clear
+            </button>
+          </div>
+          </section>
+
+          <section class="loans-section">
+          <div class="filters-grid">
+            <input
+              type="text"
+              id="searchBorrowers"
+              placeholder="Search by Name or NRC"
+            />
+            <input type="date" id="filterDueDate" />
+            <select id="filterStatus">
+              <option value="">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="paid">Paid</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table class="borrowers-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>NRC</th>
+                  <th>Email</th>
+                  <th>Amount Borrowed</th>
+                  <th>Interest %</th>
+                  <th>Total to Pay</th>
+                  <th>Due Date</th>
+                  <th>Status</th>
+                  <th>Last Comms</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="borrowersTableBody"></tbody>
+            </table>
+          </div>
+          </section>
+        </section>
+
+        <section id="sectionReports" class="panel-section hidden-section">
+          <section class="loans-section">
+            <div class="reports-header">
+              <div>
+                <h2>Reports</h2>
+                <p class="nav-subtitle">
+                  Quick summary based on your current borrower data.
+                </p>
+              </div>
+              <button type="button" class="export-pdf-btn" onclick="exportReportPdf()">
+                Export PDF
+              </button>
+              <button type="button" class="export-csv-btn" onclick="exportReportCsv()">
+                Export CSV
+              </button>
+              <button
+                type="button"
+                class="draft-reminders-btn"
+                onclick="draftFiveDayReminders()"
+              >
+                Draft 5-Day Reminders
+              </button>
+              <button
+                type="button"
+                class="draft-whatsapp-btn"
+                onclick="draftFiveDayWhatsApp()"
+              >
+                Draft 5-Day WhatsApp
+              </button>
+            </div>
+            <div class="table-wrap">
+              <table class="borrowers-table">
+                <tbody>
+                  <tr>
+                    <th>Paid Borrowers</th>
+                    <td id="reportPaidBorrowers">0</td>
+                  </tr>
+                  <tr>
+                    <th>Pending Borrowers</th>
+                    <td id="reportPendingBorrowers">0</td>
+                  </tr>
+                  <tr>
+                    <th>Total Interest</th>
+                    <td id="reportTotalInterest">K0.00</td>
+                  </tr>
+                  <tr>
+                    <th>Portfolio Value</th>
+                    <td id="reportPortfolioValue">K0.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
