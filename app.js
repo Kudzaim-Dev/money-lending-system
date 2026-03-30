@@ -291,6 +291,12 @@ window.switchDashboardSection = function (section) {
     const element = document.getElementById(id);
     if (!element) return;
     element.classList.toggle("hidden-section", key !== section);
+    if (key === section) {
+      element.classList.remove("is-entering");
+      void element.offsetWidth;
+      element.classList.add("is-entering");
+      setTimeout(() => element.classList.remove("is-entering"), 380);
+    }
   });
 
   Object.entries(tabIds).forEach(([key, id]) => {
@@ -1319,10 +1325,18 @@ window.switchTab = function (tab) {
   if (tab === "login") {
     loginForm.classList.add("active");
     registerForm.classList.remove("active");
+    loginForm.classList.remove("is-entering");
+    void loginForm.offsetWidth;
+    loginForm.classList.add("is-entering");
+    setTimeout(() => loginForm.classList.remove("is-entering"), 380);
     if (tabs[0]) tabs[0].classList.add("active");
   } else {
     loginForm.classList.remove("active");
     registerForm.classList.add("active");
+    registerForm.classList.remove("is-entering");
+    void registerForm.offsetWidth;
+    registerForm.classList.add("is-entering");
+    setTimeout(() => registerForm.classList.remove("is-entering"), 380);
     if (tabs[1]) tabs[1].classList.add("active");
   }
 };

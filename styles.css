@@ -22,6 +22,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: "Manrope", "Segoe UI", Tahoma, sans-serif;
   color: var(--text);
@@ -68,17 +72,41 @@ body {
   letter-spacing: 0.08em;
   font-size: 12px;
   font-weight: 800;
-  color: var(--primary);
+  color: #bfdbfe;
+  text-shadow: 0 2px 10px rgba(2, 6, 23, 0.65);
 }
 
 .auth-page {
+  position: relative;
+  overflow-x: hidden;
   background:
     radial-gradient(circle at 0% 0%, #e4f0ff 0, transparent 32%),
     radial-gradient(circle at 100% 100%, #dff6f2 0, transparent 30%),
     var(--bg);
 }
 
+.auth-video-bg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -3;
+}
+
+.auth-video-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(circle at 18% 14%, rgba(11, 40, 74, 0.56), transparent 42%),
+    radial-gradient(circle at 82% 88%, rgba(8, 90, 80, 0.36), transparent 40%),
+    rgba(15, 23, 42, 0.54);
+}
+
 .auth-layout {
+  position: relative;
+  z-index: 1;
   min-height: 100vh;
   width: min(1120px, 92%);
   margin: 0 auto;
@@ -93,11 +121,12 @@ body {
   margin-top: 10px;
   font-size: clamp(32px, 3.6vw, 48px);
   line-height: 1.12;
+  color: #f8fafc;
 }
 
 .brand-copy {
   margin-top: 14px;
-  color: var(--muted);
+  color: #dbe8f4;
   max-width: 56ch;
   line-height: 1.6;
 }
@@ -110,41 +139,44 @@ body {
 }
 
 .brand-points li {
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f8fafc;
   border-radius: 12px;
   padding: 12px 14px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 12px 25px rgba(2, 6, 23, 0.2);
   font-weight: 600;
+  backdrop-filter: blur(2px);
 }
 
 .auth-container {
-  background: var(--surface);
+  background: rgba(15, 23, 42, 0.28);
   border-radius: 18px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   overflow: hidden;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 24px 45px rgba(2, 6, 23, 0.35);
+  backdrop-filter: blur(12px);
 }
 
 .auth-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  background: var(--surface-soft);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .tab-btn {
   padding: 16px;
   background: transparent;
   border: none;
-  color: var(--muted);
+  color: #dbe8f4;
   font-weight: 700;
   cursor: pointer;
   transition: 0.25s ease;
 }
 
 .tab-btn.active {
-  background: var(--surface);
-  color: var(--primary);
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
 }
 
 .auth-form {
@@ -154,26 +186,38 @@ body {
 
 .auth-form.active {
   display: block;
+  animation: slide-fade-in 0.35s ease;
+}
+
+.auth-form.is-entering {
+  animation: slide-fade-in 0.35s ease;
 }
 
 .auth-form h2 {
   font-size: 25px;
+  color: #f8fafc;
 }
 
 .form-subtitle {
   margin-top: 8px;
-  color: var(--muted);
+  color: #dbe8f4;
   font-size: 14px;
 }
 
 .auth-form input {
   width: 100%;
   margin-top: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 10px;
   padding: 12px 13px;
   font-size: 14px;
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.08);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-form input::placeholder {
+  color: #cfe0ef;
 }
 
 .auth-form input:focus {
@@ -202,8 +246,8 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  border: 1px solid var(--border);
-  background: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .auth-form .toggle-password:hover {
@@ -217,7 +261,7 @@ body {
   display: inline-block;
   width: 16px;
   height: 10px;
-  border: 2px solid #475569;
+  border: 2px solid #f8fafc;
   border-radius: 999px / 70%;
 }
 
@@ -231,7 +275,7 @@ body {
   margin-top: -2px;
   margin-left: -2px;
   border-radius: 50%;
-  background: #475569;
+  background: #f8fafc;
 }
 
 .toggle-password.is-visible .eye-icon::before {
@@ -252,17 +296,18 @@ body {
   border: none;
   border-radius: 0;
   background: transparent;
-  color: var(--primary);
+  color: #bfdbfe;
   font-size: 13px;
   font-weight: 700;
   text-decoration: underline;
   cursor: pointer;
+  text-shadow: 0 2px 10px rgba(2, 6, 23, 0.7);
 }
 
 .auth-form .forgot-password-btn:hover {
   transform: none;
   filter: none;
-  color: var(--primary-strong);
+  color: #ffffff;
 }
 
 .auth-form button {
@@ -304,9 +349,9 @@ body {
 
 .auth-form .google-btn {
   margin-top: 10px;
-  background: var(--surface);
-  color: #1e293b;
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.28);
 }
 
 .auth-form .google-btn:hover {
@@ -317,7 +362,7 @@ body {
 .error-message {
   min-height: 20px;
   margin-top: 10px;
-  color: var(--danger);
+  color: #fecaca;
   font-size: 13px;
   font-weight: 600;
 }
@@ -373,6 +418,11 @@ body {
   font-size: 17px;
   font-weight: 700;
   cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.nav-link-btn:hover {
+  transform: translateY(-1px);
 }
 
 .nav-link-btn.active {
@@ -390,6 +440,12 @@ body {
   font-size: 17px;
   font-weight: 700;
   cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.logout-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
 }
 
 .dashboard-content {
@@ -399,6 +455,10 @@ body {
 
 .hidden-section {
   display: none;
+}
+
+.panel-section.is-entering {
+  animation: slide-fade-in 0.35s ease;
 }
 
 .stats-grid {
@@ -413,6 +473,12 @@ body {
   border-radius: 14px;
   padding: 18px;
   box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 24px rgba(15, 23, 42, 0.1);
 }
 
 .stat-card h3 {
@@ -570,6 +636,14 @@ body {
   font-size: 14px;
 }
 
+.borrowers-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.borrowers-table tbody tr:hover {
+  background: #f8fbff;
+}
+
 .borrowers-table th {
   background: #f1f5f9;
   font-weight: 800;
@@ -609,6 +683,12 @@ body {
   font-weight: 700;
   padding: 7px 12px;
   cursor: pointer;
+  transition: transform 0.18s ease, filter 0.2s ease;
+}
+
+.table-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
 }
 
 .table-btn.edit {
@@ -674,6 +754,17 @@ body {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+@keyframes slide-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .modal {

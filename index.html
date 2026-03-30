@@ -13,6 +13,21 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body class="auth-page">
+    <video
+      class="auth-video-bg"
+      autoplay
+      muted
+      loop
+      playsinline
+      aria-hidden="true"
+    >
+      <source
+        src="https://cdn.coverr.co/videos/coverr-woman-working-at-a-desk-1579/1080p.mp4"
+        type="video/mp4"
+      />
+    </video>
+    <div class="auth-video-overlay" aria-hidden="true"></div>
+
     <div
       id="appStatus"
       class="app-status is-info"
@@ -25,7 +40,7 @@
     <main class="auth-layout">
       <section class="brand-panel">
         <p class="eyebrow">Mambo Finance</p>
-        <h1>Track loans professionally in Zambian Kwacha.</h1>
+        <h1>Optimize your loan tracking with precision</h1>
         <p class="brand-copy">
           Manage borrowing, monitor payments, and keep every loan detail in one
           secure dashboard.
@@ -39,13 +54,19 @@
 
       <section class="auth-container" id="authContainer">
         <div class="auth-tabs">
-          <button class="tab-btn active" onclick="switchTab('login')">Login</button>
-          <button class="tab-btn" onclick="switchTab('register')">Register</button>
+          <button class="tab-btn active" onclick="switchTab('login')">
+            Login
+          </button>
+          <button class="tab-btn" onclick="switchTab('register')">
+            Register
+          </button>
         </div>
 
         <div id="loginForm" class="auth-form active">
           <h2>Welcome back</h2>
-          <p class="form-subtitle">Sign in to continue to your loan dashboard.</p>
+          <p class="form-subtitle">
+            Sign in to continue to your loan dashboard.
+          </p>
           <input type="email" id="loginEmail" placeholder="Email" required />
           <div class="password-field">
             <input
@@ -72,13 +93,17 @@
           </button>
           <button onclick="login()">Sign In</button>
           <div class="form-divider"><span>or</span></div>
-          <button onclick="loginWithGoogle()" class="google-btn">Continue with Google</button>
+          <button onclick="loginWithGoogle()" class="google-btn">
+            Continue with Google
+          </button>
           <div id="loginError" class="error-message"></div>
         </div>
 
         <div id="registerForm" class="auth-form">
           <h2>Create account</h2>
-          <p class="form-subtitle">Set up your profile and start tracking loans.</p>
+          <p class="form-subtitle">
+            Set up your profile and start tracking loans.
+          </p>
           <input
             type="text"
             id="registerName"
