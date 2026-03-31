@@ -1084,6 +1084,15 @@ body {
     grid-template-columns: 1fr;
     width: min(600px, 92%);
     padding: 34px 0;
+    gap: 22px;
+  }
+
+  .brand-panel {
+    order: 2;
+  }
+
+  .auth-container {
+    order: 1;
   }
 
   .stats-grid {
@@ -1097,25 +1106,159 @@ body {
 }
 
 @media (max-width: 680px) {
+  body {
+    overflow-x: hidden;
+  }
+
   .app-status {
     left: 12px;
     right: 12px;
     text-align: center;
   }
 
+  .auth-layout {
+    width: min(100%, 94%);
+    padding: 24px 0 28px;
+    gap: 16px;
+  }
+
+  .brand-panel {
+    padding: 0 4px;
+  }
+
+  .brand-panel h1 {
+    font-size: clamp(28px, 10vw, 38px);
+  }
+
+  .brand-copy {
+    font-size: 14px;
+  }
+
+  .brand-points {
+    gap: 10px;
+  }
+
+  .brand-points li {
+    padding: 11px 12px;
+    font-size: 14px;
+  }
+
+  .auth-container {
+    border-radius: 16px;
+  }
+
+  .auth-form {
+    padding: 22px 18px;
+  }
+
+  .auth-form h2 {
+    font-size: 23px;
+  }
+
+  .admin-profiles {
+    grid-template-columns: 1fr;
+  }
+
+  .selected-admin-email {
+    line-height: 1.5;
+  }
+
+  .auth-form input {
+    font-size: 16px;
+  }
+
+  .auth-form button,
+  .admin-profile-btn {
+    min-height: 48px;
+  }
+
   .navbar {
     flex-direction: column;
     align-items: flex-start;
+    width: min(100%, 94%);
+    margin-top: 12px;
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .nav-brand-wrap h1 {
+    font-size: 24px;
+    line-height: 1.15;
   }
 
   .nav-links {
     width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .nav-link-btn,
+  .logout-btn {
+    width: 100%;
+    min-height: 46px;
+    font-size: 15px;
+    text-align: center;
+  }
+
+  .dashboard-content {
+    width: min(100%, 94%);
+    margin: 14px auto 28px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card,
+  .account-section,
+  .add-loan-section,
+  .loans-section {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .stat-card p {
+    font-size: 28px;
+  }
+
+  .account-section h2,
+  .change-password-card h3 {
+    font-size: 22px;
+  }
+
+  .change-password-card {
+    padding: 16px;
   }
 
   .borrower-form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .add-loan-section h2 {
+    font-size: 30px;
+    margin-bottom: 10px;
+  }
+
+  .borrower-form-grid input,
+  .filters-grid input,
+  .filters-grid select,
+  .dashboard-password-field input {
+    font-size: 16px;
+  }
+
+  .borrower-form-actions,
+  .change-password-actions,
+  .action-buttons-wrap {
+    flex-direction: column;
+  }
+
+  .borrower-form-actions button,
+  .primary-action-btn,
+  .password-clear-btn,
+  .table-btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .filters-grid {
@@ -1125,6 +1268,18 @@ body {
   .reports-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .reports-header > * {
+    width: 100%;
+  }
+
+  .export-pdf-btn,
+  .export-csv-btn,
+  .draft-reminders-btn,
+  .draft-whatsapp-btn {
+    width: 100%;
+    text-align: center;
   }
 
   .account-section-header {
@@ -1138,5 +1293,73 @@ body {
 
   .action-grid {
     grid-template-columns: 1fr;
+  }
+
+  .borrower-loading-state {
+    min-height: 220px;
+    padding: 26px 16px;
+  }
+
+  .borrower-loading-title {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-layout {
+    width: min(100%, 95%);
+    padding-top: 18px;
+  }
+
+  .auth-form {
+    padding: 20px 16px;
+  }
+
+  .password-field input {
+    padding-right: 62px;
+  }
+
+  .auth-form .password-field .toggle-password {
+    right: 10px;
+    padding: 4px 2px;
+  }
+
+  .auth-form .toggle-password-text {
+    font-size: 11px;
+  }
+
+  .navbar,
+  .dashboard-content {
+    width: min(100%, 95%);
+  }
+
+  .nav-links {
+    grid-template-columns: 1fr;
+  }
+
+  .nav-brand-wrap h1 {
+    font-size: 22px;
+  }
+
+  .nav-subtitle {
+    font-size: 13px;
+  }
+
+  .stat-card,
+  .account-section,
+  .add-loan-section,
+  .loans-section,
+  .change-password-card {
+    padding: 14px;
+  }
+
+  .borrowers-table th,
+  .borrowers-table td {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+
+  .table-btn {
+    min-height: 44px;
   }
 }
