@@ -34,7 +34,13 @@
       <div class="dashboard-content">
         <section class="loans-section">
           <div id="borrowerActionCard" class="borrower-action-card">
-            <p>Loading borrower details...</p>
+            <div class="borrower-loading-state" aria-live="polite">
+              <div class="borrower-loading-spinner" aria-hidden="true"></div>
+              <p class="borrower-loading-title">Loading borrower details</p>
+              <p class="borrower-loading-copy">
+                Please wait while we fetch the latest borrower information.
+              </p>
+            </div>
           </div>
         </section>
       </div>

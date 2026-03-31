@@ -4,9 +4,11 @@ import { jsPDF } from "https://cdn.jsdelivr.net/npm/jspdf@2.5.1/+esm";
 import {
   signInWithEmailAndPassword,
   fetchSignInMethodsForEmail,
+  EmailAuthProvider,
   GoogleAuthProvider,
   getRedirectResult,
   sendPasswordResetEmail,
+  reauthenticateWithCredential,
   signInWithPopup,
   signInWithRedirect,
   signOut,
@@ -376,6 +378,60 @@ function setLoginLoading(isLoading) {
   if (loginPassword) loginPassword.disabled = isLoading;
 }
 
+function setChangePasswordLoading(isLoading) {
+  const submitBtn = document.getElementById("changePasswordBtn");
+  const clearBtn = document.querySelector(".change-password-actions .secondary-btn");
+  const fieldIds = ["currentPassword", "newPassword", "confirmNewPassword"];
+
+  if (submitBtn) {
+    submitBtn.disabled = isLoading;
+    submitBtn.textContent = isLoading ? "Updating..." : "Update Password";
+  }
+
+  if (clearBtn) clearBtn.disabled = isLoading;
+
+  fieldIds.forEach((fieldId) => {
+    const input = document.getElementById(fieldId);
+    if (input) input.disabled = isLoading;
+  });
+}
+
+function syncDashboardAdminSummary(user) {
+  const adminName = document.getElementById("dashboardAdminName");
+  const adminEmail = document.getElementById("dashboardAdminEmail");
+  if (!adminName && !adminEmail) return;
+
+  const matchedAdmin = ADMIN_PROFILES.find(
+    (admin) => admin.email.toLowerCase() === (user?.email || "").toLowerCase(),
+  );
+  const displayName =
+    matchedAdmin?.name || user?.displayName || localStorage.getItem("userName") || "Admin";
+
+  if (adminName) adminName.textContent = displayName;
+  if (adminEmail) adminEmail.textContent = user?.email || "Signed in email";
+}
+
+window.clearChangePasswordForm = function () {
+  const fieldIds = ["currentPassword", "newPassword", "confirmNewPassword"];
+  fieldIds.forEach((fieldId) => {
+    const input = document.getElementById(fieldId);
+    if (input) {
+      input.value = "";
+      if (input.type !== "password") input.type = "password";
+    }
+  });
+
+  document
+    .querySelectorAll(".change-password-card .toggle-password")
+    .forEach((button) => {
+      button.classList.remove("is-visible");
+      button.setAttribute("aria-label", "Show password");
+    });
+
+  const errorDiv = document.getElementById("changePasswordError");
+  if (errorDiv) errorDiv.textContent = "";
+};
+
 window.selectAdminProfile = function (adminId) {
   selectedAdminId = adminId;
   const admin = getSelectedAdminProfile();
@@ -593,6 +649,81 @@ window.togglePassword = function (inputId, buttonElement) {
     "aria-label",
     isPassword ? "Hide password" : "Show password",
   );
+
+  const toggleText = buttonElement.querySelector(".toggle-password-text");
+  if (toggleText) {
+    toggleText.textContent = isPassword ? "Hide" : "Show";
+  }
+};
+
+window.changeAdminPassword = async function () {
+  const errorDiv = document.getElementById("changePasswordError");
+  const currentPassword = document.getElementById("currentPassword")?.value.trim() || "";
+  const newPassword = document.getElementById("newPassword")?.value.trim() || "";
+  const confirmPassword =
+    document.getElementById("confirmNewPassword")?.value.trim() || "";
+
+  if (errorDiv) errorDiv.textContent = "";
+
+  if (!auth.currentUser?.email) {
+    const message = "No signed-in admin account was found.";
+    if (errorDiv) errorDiv.textContent = message;
+    setAppStatus(message, "error", true);
+    return;
+  }
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    const message = "Fill in all password fields first.";
+    if (errorDiv) errorDiv.textContent = message;
+    setAppStatus(message, "error", true);
+    return;
+  }
+
+  if (newPassword.length < 6) {
+    const message = "New password must be at least 6 characters.";
+    if (errorDiv) errorDiv.textContent = message;
+    setAppStatus(message, "error", true);
+    return;
+  }
+
+  if (newPassword === DEFAULT_ADMIN_PASSWORD) {
+    const message = "New password cannot be the default admin password.";
+    if (errorDiv) errorDiv.textContent = message;
+    setAppStatus(message, "error", true);
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    const message = "New password and confirmation do not match.";
+    if (errorDiv) errorDiv.textContent = message;
+    setAppStatus(message, "error", true);
+    return;
+  }
+
+  if (currentPassword === newPassword) {
+    const message = "Choose a new password that is different from the current one.";
+    if (errorDiv) errorDiv.textContent = message;
+    setAppStatus(message, "error", true);
+    return;
+  }
+
+  try {
+    setChangePasswordLoading(true);
+    const credential = EmailAuthProvider.credential(
+      auth.currentUser.email,
+      currentPassword,
+    );
+    await reauthenticateWithCredential(auth.currentUser, credential);
+    await updatePassword(auth.currentUser, newPassword);
+    window.clearChangePasswordForm();
+    setAppStatus("Password updated successfully.", "ok");
+  } catch (error) {
+    const message = getFriendlyAuthError(error);
+    if (errorDiv) errorDiv.textContent = message;
+    setAppStatus(`Password update failed: ${message}`, "error", true);
+  } finally {
+    setChangePasswordLoading(false);
+  }
 };
 
 // Dashboard Functions
@@ -1421,6 +1552,7 @@ onAuthStateChanged(auth, (user) => {
       .then(() => {
         setAppStatus("Authenticated", "ok");
         if (window.location.pathname.includes("dashboard.html")) {
+          syncDashboardAdminSummary(user);
           window.switchDashboardSection(currentDashboardSection);
           loadBorrowersDashboard();
         } else if (window.location.pathname.includes("borrower-actions.html")) {

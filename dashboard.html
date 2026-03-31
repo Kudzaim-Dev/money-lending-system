@@ -76,6 +76,96 @@
               <p id="statTotalExpected">K0.00</p>
             </div>
           </div>
+
+          <section class="account-section">
+            <div class="account-section-header">
+              <div>
+                <h2>Account Settings</h2>
+                <p class="nav-subtitle">
+                  Update the admin password directly from the dashboard.
+                </p>
+              </div>
+              <div class="account-admin-badge">
+                <span id="dashboardAdminName">Admin</span>
+                <small id="dashboardAdminEmail">Signed in email</small>
+              </div>
+            </div>
+
+            <div class="change-password-card">
+              <h3>Change Password</h3>
+              <p class="change-password-copy">
+                Enter your current password, then choose a stronger new one.
+              </p>
+              <div class="change-password-grid">
+                <div class="password-field dashboard-password-field">
+                  <input
+                    type="password"
+                    id="currentPassword"
+                    placeholder="Current Password"
+                    autocomplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    class="toggle-password"
+                    onclick="togglePassword('currentPassword', this)"
+                    aria-label="Show password"
+                  >
+                    <span class="eye-icon" aria-hidden="true"></span>
+                  </button>
+                </div>
+                <div class="password-field dashboard-password-field">
+                  <input
+                    type="password"
+                    id="newPassword"
+                    placeholder="New Password"
+                    autocomplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    class="toggle-password"
+                    onclick="togglePassword('newPassword', this)"
+                    aria-label="Show password"
+                  >
+                    <span class="eye-icon" aria-hidden="true"></span>
+                  </button>
+                </div>
+                <div class="password-field dashboard-password-field">
+                  <input
+                    type="password"
+                    id="confirmNewPassword"
+                    placeholder="Confirm New Password"
+                    autocomplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    class="toggle-password"
+                    onclick="togglePassword('confirmNewPassword', this)"
+                    aria-label="Show password"
+                  >
+                    <span class="eye-icon" aria-hidden="true"></span>
+                  </button>
+                </div>
+              </div>
+              <div class="change-password-actions">
+                <button
+                  type="button"
+                  id="changePasswordBtn"
+                  class="primary-action-btn"
+                  onclick="changeAdminPassword()"
+                >
+                  Update Password
+                </button>
+                <button
+                  type="button"
+                  class="secondary-btn password-clear-btn"
+                  onclick="clearChangePasswordForm()"
+                >
+                  Clear
+                </button>
+              </div>
+              <div id="changePasswordError" class="dashboard-inline-error"></div>
+            </div>
+          </section>
         </section>
 
         <section id="sectionBorrowers" class="panel-section">
