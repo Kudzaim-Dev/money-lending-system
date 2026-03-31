@@ -53,21 +53,17 @@
       </section>
 
       <section class="auth-container" id="authContainer">
-        <div class="auth-tabs">
-          <button class="tab-btn active" onclick="switchTab('login')">
-            Login
-          </button>
-          <button class="tab-btn" onclick="switchTab('register')">
-            Register
-          </button>
+        <div class="auth-tabs single-tab">
+          <button class="tab-btn active">Admin Login</button>
         </div>
 
         <div id="loginForm" class="auth-form active">
           <h2>Welcome back</h2>
           <p class="form-subtitle">
-            Sign in to continue to your loan dashboard.
+            Select an admin profile and enter the password.
           </p>
-          <input type="email" id="loginEmail" placeholder="Email" required />
+          <div id="adminProfiles" class="admin-profiles"></div>
+          <p id="selectedAdminEmail" class="selected-admin-email"></p>
           <div class="password-field">
             <input
               type="password"
@@ -91,44 +87,8 @@
           >
             Forgot password?
           </button>
-          <button onclick="login()">Sign In</button>
-          <div class="form-divider"><span>or</span></div>
-          <button onclick="loginWithGoogle()" class="google-btn">
-            Continue with Google
-          </button>
+          <button id="loginSubmitBtn" onclick="login()">Sign In</button>
           <div id="loginError" class="error-message"></div>
-        </div>
-
-        <div id="registerForm" class="auth-form">
-          <h2>Create account</h2>
-          <p class="form-subtitle">
-            Set up your profile and start tracking loans.
-          </p>
-          <input
-            type="text"
-            id="registerName"
-            placeholder="Full Name"
-            required
-          />
-          <input type="email" id="registerEmail" placeholder="Email" required />
-          <div class="password-field">
-            <input
-              type="password"
-              id="registerPassword"
-              placeholder="Password (min 6 characters)"
-              required
-            />
-            <button
-              type="button"
-              class="toggle-password"
-              onclick="togglePassword('registerPassword', this)"
-              aria-label="Show password"
-            >
-              <span class="eye-icon" aria-hidden="true"></span>
-            </button>
-          </div>
-          <button onclick="register()">Create Account</button>
-          <div id="registerError" class="error-message"></div>
         </div>
       </section>
     </main>

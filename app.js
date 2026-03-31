@@ -2,7 +2,6 @@
 import { auth, db } from "./firebase-config.js";
 import { jsPDF } from "https://cdn.jsdelivr.net/npm/jspdf@2.5.1/+esm";
 import {
-  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   fetchSignInMethodsForEmail,
   GoogleAuthProvider,
@@ -11,6 +10,7 @@ import {
   signInWithPopup,
   signInWithRedirect,
   signOut,
+  updatePassword,
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import {
@@ -37,6 +37,21 @@ let editingBorrowerId = null;
 let borrowersCache = [];
 let borrowerBindingsInitialized = false;
 let currentDashboardSection = "borrowers";
+let selectedAdminId = "admin_1";
+const DEFAULT_ADMIN_PASSWORD = "1234567";
+const SHARED_WORKSPACE_ID = "mambo-main";
+const ADMIN_PROFILES = [
+  {
+    id: "admin_1",
+    name: "Tulani",
+    email: "tulani1mambo@gmail.com",
+  },
+  {
+    id: "admin_2",
+    name: "Kudzai",
+    email: "kudzaimambo5@gmail.com",
+  },
+];
 const kwachaFormatter = new Intl.NumberFormat("en-ZM", {
   style: "currency",
   currency: "ZMW",
@@ -45,6 +60,83 @@ const kwachaFormatter = new Intl.NumberFormat("en-ZM", {
 
 function formatCurrency(amount) {
   return kwachaFormatter.format(Number(amount) || 0);
+}
+
+function getSelectedAdminProfile() {
+  return ADMIN_PROFILES.find((admin) => admin.id === selectedAdminId) || null;
+}
+
+function isAuthorizedAdminEmail(email) {
+  if (!email) return false;
+  const normalized = email.toLowerCase();
+  return ADMIN_PROFILES.some(
+    (admin) => admin.email.toLowerCase() === normalized,
+  );
+}
+
+async function ensureAdminUserProfile(user, preferredName = "") {
+  if (!user?.uid || !isAuthorizedAdminEmail(user.email)) return;
+  await setDoc(
+    doc(db, "users", user.uid),
+    {
+      uid: user.uid,
+      email: user.email || "",
+      name: preferredName || user.displayName || user.email || "Admin",
+      role: "admin",
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true },
+  );
+}
+
+async function enforceDefaultPasswordChange(enteredPassword) {
+  if (enteredPassword !== DEFAULT_ADMIN_PASSWORD) return true;
+
+  setAppStatus(
+    "Default password detected. You must set a new password now.",
+    "info",
+    true,
+  );
+
+  let nextPassword = window.prompt(
+    "Set a new password (minimum 6 characters):",
+    "",
+  );
+
+  while (nextPassword !== null) {
+    const trimmed = nextPassword.trim();
+    if (trimmed.length < 6) {
+      nextPassword = window.prompt(
+        "Password too short. Enter at least 6 characters:",
+        "",
+      );
+      continue;
+    }
+    if (trimmed === DEFAULT_ADMIN_PASSWORD) {
+      nextPassword = window.prompt(
+        "New password cannot be the default. Enter a different one:",
+        "",
+      );
+      continue;
+    }
+
+    try {
+      await updatePassword(auth.currentUser, trimmed);
+      setAppStatus("Password updated successfully.", "ok");
+      return true;
+    } catch (error) {
+      setAppStatus(`Password update failed: ${error.message}`, "error", true);
+      return false;
+    }
+  }
+
+  await signOut(auth);
+  setAppStatus(
+    "Password change canceled. Sign in again and set a new password.",
+    "error",
+    true,
+  );
+  return false;
 }
 
 function formatDateLabel(dateIso) {
@@ -274,6 +366,48 @@ function setAppStatus(message, type = "info", persistent = false) {
   }
 }
 
+function setLoginLoading(isLoading) {
+  const loginBtn = document.getElementById("loginSubmitBtn");
+  const loginPassword = document.getElementById("loginPassword");
+  if (!loginBtn) return;
+
+  loginBtn.disabled = isLoading;
+  loginBtn.textContent = isLoading ? "Signing in..." : "Sign In";
+  if (loginPassword) loginPassword.disabled = isLoading;
+}
+
+window.selectAdminProfile = function (adminId) {
+  selectedAdminId = adminId;
+  const admin = getSelectedAdminProfile();
+  const selectedAdminLabel = document.getElementById("selectedAdminEmail");
+  if (selectedAdminLabel) {
+    selectedAdminLabel.textContent = admin
+      ? `Selected: ${admin.name} (${admin.email})`
+      : "No admin selected";
+  }
+
+  const profileButtons = document.querySelectorAll(".admin-profile-btn");
+  profileButtons.forEach((btn) => {
+    const isActive = btn.getAttribute("data-admin-id") === adminId;
+    btn.classList.toggle("active", isActive);
+  });
+};
+
+function initAdminProfileLoginUI() {
+  const profilesContainer = document.getElementById("adminProfiles");
+  if (!profilesContainer) return;
+
+  profilesContainer.innerHTML = ADMIN_PROFILES.map(
+    (admin) =>
+      `<button type="button" class="admin-profile-btn" data-admin-id="${admin.id}" onclick="selectAdminProfile('${admin.id}')">${admin.name}</button>`,
+  ).join("");
+
+  const initialProfile = getSelectedAdminProfile() || ADMIN_PROFILES[0];
+  if (initialProfile) {
+    window.selectAdminProfile(initialProfile.id);
+  }
+}
+
 window.switchDashboardSection = function (section) {
   currentDashboardSection = section;
   const sectionIds = {
@@ -332,58 +466,37 @@ window.addEventListener("offline", () => {
 
 runStartupHealthCheck();
 handleGoogleRedirectResult();
+initAdminProfileLoginUI();
 
 // Authentication Functions
 window.login = async function () {
-  const email = document.getElementById("loginEmail").value;
+  const selectedAdmin = getSelectedAdminProfile();
+  const email = selectedAdmin?.email || "";
   const password = document.getElementById("loginPassword").value;
   const errorDiv = document.getElementById("loginError");
 
+  if (!email) {
+    const message = "Please select an admin profile first.";
+    errorDiv.textContent = message;
+    setAppStatus(message, "error", true);
+    return;
+  }
+
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    setLoginLoading(true);
+    const credential = await signInWithEmailAndPassword(auth, email, password);
+    const changedPassword = await enforceDefaultPasswordChange(password);
+    if (!changedPassword) return;
+    await ensureAdminUserProfile(credential.user, selectedAdmin?.name || "");
+    localStorage.setItem("userName", selectedAdmin?.name || email);
     setAppStatus("Login successful. Opening dashboard...", "ok");
     window.location.href = "dashboard.html";
   } catch (error) {
     const message = getFriendlyAuthError(error);
     errorDiv.textContent = message;
     setAppStatus(`Login error: ${message}`, "error", true);
-  }
-};
-
-window.register = async function () {
-  const name = document.getElementById("registerName").value;
-  const email = document.getElementById("registerEmail").value;
-  const password = document.getElementById("registerPassword").value;
-  const errorDiv = document.getElementById("registerError");
-
-  try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password,
-    );
-    // Store user name in localStorage
-    localStorage.setItem("userName", name);
-    // Also store in Firestore for better persistence
-    await setDoc(doc(db, "users", userCredential.user.uid), {
-      uid: userCredential.user.uid,
-      name: name,
-      email: email,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-    setAppStatus("Account created. Opening dashboard...", "ok");
-    window.location.href = "dashboard.html";
-  } catch (error) {
-    const message = getFriendlyAuthError(error);
-    errorDiv.textContent = message;
-    setAppStatus(`Registration error: ${message}`, "error", true);
-
-    if (error?.code === "auth/email-already-in-use") {
-      switchTab("login");
-      const loginEmail = document.getElementById("loginEmail");
-      if (loginEmail) loginEmail.value = email;
-    }
+  } finally {
+    setLoginLoading(false);
   }
 };
 
@@ -405,19 +518,18 @@ window.loginWithGoogle = async function () {
   try {
     const userCredential = await signInWithPopup(auth, provider);
     const user = userCredential.user;
+    if (!isAuthorizedAdminEmail(user.email)) {
+      await signOut(auth);
+      const message = "This Google account is not allowed as an admin.";
+      if (loginError) loginError.textContent = message;
+      setAppStatus(message, "error", true);
+      return;
+    }
+
     const displayName = user.displayName || user.email || "Google User";
 
     localStorage.setItem("userName", displayName);
-    await setDoc(
-      doc(db, "users", user.uid),
-      {
-        uid: user.uid,
-        name: displayName,
-        email: user.email,
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true },
-    );
+    await ensureAdminUserProfile(user, displayName);
 
     setAppStatus("Google sign-in successful. Opening dashboard...", "ok");
     window.location.href = "dashboard.html";
@@ -448,12 +560,12 @@ window.loginWithGoogle = async function () {
 };
 
 window.forgotPassword = async function () {
-  const loginEmail = document.getElementById("loginEmail");
   const loginError = document.getElementById("loginError");
-  const email = (loginEmail?.value || "").trim();
+  const selectedAdmin = getSelectedAdminProfile();
+  const email = (selectedAdmin?.email || "").trim();
 
   if (!email) {
-    const message = "Please enter your email address first.";
+    const message = "Please select an admin profile first.";
     if (loginError) loginError.textContent = message;
     setAppStatus(message, "error", true);
     return;
@@ -618,7 +730,9 @@ window.saveBorrower = async function () {
   );
 
   const payload = {
+    workspaceId: SHARED_WORKSPACE_ID,
     userId: currentUser.uid,
+    createdByUid: currentUser.uid,
     name: values.name,
     nrc: values.nrc,
     address: values.address,
@@ -1055,47 +1169,6 @@ function renderSummaryAndReports() {
   setText("reportPortfolioValue", formatCurrency(totalExpected));
 }
 
-window.runPermissionSelfTest = async function () {
-  const authUser = auth.currentUser;
-  const projectId = auth?.app?.options?.projectId || "unknown";
-
-  if (!authUser?.uid) {
-    const message = "Self-test failed: no authenticated user in session.";
-    console.error(message);
-    setAppStatus(message, "error", true);
-    return;
-  }
-
-  const payload = {
-    userId: authUser.uid,
-    name: "Permission Test",
-    nrc: "TEST-NRC",
-    amountBorrowed: 1,
-    interestPercentage: 0,
-    interestAmount: 0,
-    totalToPay: 1,
-    dateBorrowed: new Date().toISOString().slice(0, 10),
-    dueDate: new Date().toISOString().slice(0, 10),
-    status: "pending",
-    createdAt: serverTimestamp(),
-    testRecord: true,
-  };
-
-  try {
-    const testRef = await addDoc(collection(db, "borrowers"), payload);
-    await deleteDoc(testRef);
-    const okMessage = `Self-test passed on project "${projectId}" for uid "${authUser.uid}".`;
-    console.log(okMessage);
-    setAppStatus(okMessage, "ok", true);
-  } catch (error) {
-    const failMessage =
-      `Self-test failed on project "${projectId}" for uid "${authUser.uid}". ` +
-      `Code: ${error.code || "unknown"} | Message: ${error.message}`;
-    console.error(failMessage);
-    setAppStatus("Permission self-test failed. Check console details.", "error", true);
-  }
-};
-
 window.exportReportPdf = function () {
   try {
     const totalBorrowers = borrowersCache.length;
@@ -1279,22 +1352,32 @@ function loadBorrowersDashboard() {
   const borrowersRef = collection(db, "borrowers");
   const borrowersQuery = query(
     borrowersRef,
-    where("userId", "==", currentUser.uid),
+    where("workspaceId", "==", SHARED_WORKSPACE_ID),
   );
 
   borrowersUnsubscribe = onSnapshot(
     borrowersQuery,
-    (snapshot) => {
-      borrowersCache = snapshot.docs
-        .map((snapshotDoc) => ({
+    async (snapshot) => {
+      let allBorrowers = snapshot.docs.map((snapshotDoc) => ({
+        id: snapshotDoc.id,
+        ...snapshotDoc.data(),
+      }));
+
+      if (allBorrowers.length === 0) {
+        const legacySnapshot = await getDocs(
+          query(collection(db, "borrowers"), where("userId", "==", currentUser.uid)),
+        );
+        allBorrowers = legacySnapshot.docs.map((snapshotDoc) => ({
           id: snapshotDoc.id,
           ...snapshotDoc.data(),
-        }))
-        .sort((a, b) => {
-          const aTs = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
-          const bTs = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
-          return bTs - aTs;
-        });
+        }));
+      }
+
+      borrowersCache = allBorrowers.sort((a, b) => {
+        const aTs = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+        const bTs = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        return bTs - aTs;
+      });
       renderBorrowersTable();
       renderSummaryAndReports();
     },
@@ -1313,34 +1396,6 @@ function loadBorrowersDashboard() {
   );
 }
 
-window.switchTab = function (tab) {
-  const loginForm = document.getElementById("loginForm");
-  const registerForm = document.getElementById("registerForm");
-  const tabs = document.querySelectorAll(".tab-btn");
-
-  if (!loginForm || !registerForm) return;
-
-  tabs.forEach((btn) => btn.classList.remove("active"));
-
-  if (tab === "login") {
-    loginForm.classList.add("active");
-    registerForm.classList.remove("active");
-    loginForm.classList.remove("is-entering");
-    void loginForm.offsetWidth;
-    loginForm.classList.add("is-entering");
-    setTimeout(() => loginForm.classList.remove("is-entering"), 380);
-    if (tabs[0]) tabs[0].classList.add("active");
-  } else {
-    loginForm.classList.remove("active");
-    registerForm.classList.add("active");
-    registerForm.classList.remove("is-entering");
-    void registerForm.offsetWidth;
-    registerForm.classList.add("is-entering");
-    setTimeout(() => registerForm.classList.remove("is-entering"), 380);
-    if (tabs[1]) tabs[1].classList.add("active");
-  }
-};
-
 // Helper function to escape HTML
 function escapeHtml(text) {
   const div = document.createElement("div");
@@ -1351,14 +1406,30 @@ function escapeHtml(text) {
 // Auth State Listener
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    currentUser = user;
-    setAppStatus("Authenticated", "ok");
-    if (window.location.pathname.includes("dashboard.html")) {
-      window.switchDashboardSection(currentDashboardSection);
-      loadBorrowersDashboard();
-    } else if (window.location.pathname.includes("borrower-actions.html")) {
-      loadBorrowerActionsPage();
+    if (!isAuthorizedAdminEmail(user.email)) {
+      setAppStatus(
+        "Access denied: this account is not configured as an admin.",
+        "error",
+        true,
+      );
+      signOut(auth);
+      return;
     }
+
+    currentUser = user;
+    ensureAdminUserProfile(user, localStorage.getItem("userName") || "")
+      .then(() => {
+        setAppStatus("Authenticated", "ok");
+        if (window.location.pathname.includes("dashboard.html")) {
+          window.switchDashboardSection(currentDashboardSection);
+          loadBorrowersDashboard();
+        } else if (window.location.pathname.includes("borrower-actions.html")) {
+          loadBorrowerActionsPage();
+        }
+      })
+      .catch((error) => {
+        setAppStatus(`Profile sync error: ${error.message}`, "error", true);
+      });
   } else {
     setAppStatus("Signed out", "info");
     if (window.location.pathname.includes("dashboard.html")) {

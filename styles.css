@@ -164,6 +164,10 @@ body {
   background: rgba(255, 255, 255, 0.08);
 }
 
+.auth-tabs.single-tab {
+  grid-template-columns: 1fr;
+}
+
 .tab-btn {
   padding: 16px;
   background: transparent;
@@ -189,9 +193,6 @@ body {
   animation: slide-fade-in 0.35s ease;
 }
 
-.auth-form.is-entering {
-  animation: slide-fade-in 0.35s ease;
-}
 
 .auth-form h2 {
   font-size: 25px;
@@ -218,6 +219,40 @@ body {
 
 .auth-form input::placeholder {
   color: #cfe0ef;
+}
+
+.admin-profiles {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.admin-profile-btn {
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2effa;
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.admin-profile-btn:hover {
+  transform: translateY(-1px);
+}
+
+.admin-profile-btn.active {
+  background: rgba(49, 130, 206, 0.5);
+  border-color: rgba(191, 219, 254, 0.7);
+  color: #ffffff;
+}
+
+.selected-admin-email {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #dbe8f4;
 }
 
 .auth-form input:focus {
@@ -322,6 +357,11 @@ body {
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.auth-form button:disabled {
+  opacity: 0.7;
+  cursor: wait;
 }
 
 .auth-form button:hover {
@@ -767,85 +807,6 @@ body {
   }
 }
 
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 1100;
-  background: rgba(15, 23, 42, 0.55);
-  padding: 24px;
-}
-
-.modal-content {
-  background: var(--surface);
-  max-width: 660px;
-  max-height: 86vh;
-  margin: 0 auto;
-  border-radius: 16px;
-  padding: 22px;
-  overflow-y: auto;
-}
-
-.close {
-  float: right;
-  font-size: 28px;
-  cursor: pointer;
-  color: var(--muted);
-}
-
-.loan-full-details p {
-  margin: 8px 0;
-  font-size: 14px;
-}
-
-.payment-form {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-
-.payment-form h3 {
-  margin-bottom: 10px;
-}
-
-.payment-form input {
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px;
-}
-
-.payment-form button {
-  margin-top: 10px;
-  border: none;
-  border-radius: 10px;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, var(--primary), #3182ce);
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.payment-history {
-  margin-top: 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.payment-record {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
-  font-size: 14px;
-}
-
-.payment-record:last-child {
-  border-bottom: none;
-}
-
 @media (max-width: 960px) {
   .auth-layout {
     grid-template-columns: 1fr;
@@ -857,9 +818,6 @@ body {
     grid-template-columns: repeat(2, minmax(160px, 1fr));
   }
 
-  .loan-form {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 
 @media (max-width: 680px) {
