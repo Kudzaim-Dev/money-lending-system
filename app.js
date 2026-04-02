@@ -1005,6 +1005,15 @@ window.editBorrower = function (borrowerId) {
   setAutoBorrowerAmounts();
 };
 
+window.startBorrowerEdit = function (borrowerId) {
+  window.switchDashboardSection("borrowers");
+  window.editBorrower(borrowerId);
+  const formSection = document.querySelector(".add-loan-section");
+  if (formSection && typeof formSection.scrollIntoView === "function") {
+    formSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+};
+
 window.openBorrowerActions = function (borrowerId) {
   const borrower = borrowersCache.find((item) => item.id === borrowerId);
   if (borrower) saveBorrowerCacheForOffline(borrower);
@@ -1046,8 +1055,23 @@ function formatIsoDate(isoDate) {
 
 function isBorrowerDueOrOverdue(dueDateIso) {
   if (!dueDateIso) return false;
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = getTodayIso();
   return dueDateIso <= todayIso;
+}
+
+function getBorrowerDisplayStatus(borrower) {
+  if (borrower?.status === "paid") {
+    return { label: "Paid", className: "paid", isOverdue: false };
+  }
+
+  const isOverdue =
+    Boolean(borrower?.dueDate) && borrower.dueDate < getTodayIso();
+
+  if (isOverdue) {
+    return { label: "Over Due", className: "overdue", isOverdue: true };
+  }
+
+  return { label: "Pending", className: "pending", isOverdue: false };
 }
 
 function getFilteredBorrowers() {
@@ -1064,7 +1088,12 @@ function getFilteredBorrowers() {
       borrower.nrc?.toLowerCase().includes(search);
 
     const matchesDueDate = !dueDateFilter || borrower.dueDate === dueDateFilter;
-    const matchesStatus = !statusFilter || borrower.status === statusFilter;
+    const displayStatus = getBorrowerDisplayStatus(borrower);
+    const matchesStatus =
+      !statusFilter ||
+      (statusFilter === "paid" && displayStatus.className === "paid") ||
+      (statusFilter === "pending" && displayStatus.className === "pending") ||
+      (statusFilter === "overdue" && displayStatus.className === "overdue");
     return matchesSearch && matchesDueDate && matchesStatus;
   });
 }
@@ -1082,7 +1111,8 @@ function renderBorrowersTable() {
 
   tableBody.innerHTML = filtered
     .map((borrower) => {
-      const isPaid = borrower.status === "paid";
+      const displayStatus = getBorrowerDisplayStatus(borrower);
+      const isPaid = displayStatus.className === "paid";
       return `
         <tr>
           <td>${escapeHtml(borrower.name || "")}</td>
@@ -1092,12 +1122,13 @@ function renderBorrowersTable() {
           <td>${Number(borrower.interestPercentage || 0).toFixed(2)}%</td>
           <td>${formatCurrency(borrower.totalToPay)}</td>
           <td>${formatIsoDate(borrower.dueDate)}</td>
-          <td><span class="status-pill ${isPaid ? "paid" : "pending"}">${isPaid ? "Paid" : "Pending"}</span></td>
+          <td><span class="status-pill ${displayStatus.className}">${displayStatus.label}</span></td>
           <td>${escapeHtml(
             `${borrower.lastCommunicationChannel || "-"} / ${borrower.lastCommunicationType || "-"} / ${formatTimestampLabel(borrower.lastCommunicationAt)}`,
           )}</td>
           <td>
             <div class="table-actions">
+              <button type="button" class="table-btn edit" onclick="startBorrowerEdit('${borrower.id}')">Edit</button>
               <button type="button" class="table-btn manage" onclick="openBorrowerActions('${borrower.id}')">Manage</button>
               <button type="button" class="table-btn paid" onclick="markBorrowerPaid('${borrower.id}')" ${isPaid ? "disabled" : ""}>Mark Paid</button>
             </div>
@@ -1112,12 +1143,13 @@ function renderBorrowerActionCard(borrower) {
   const card = document.getElementById("borrowerActionCard");
   if (!card) return;
 
-  const isPaid = borrower.status === "paid";
+  const displayStatus = getBorrowerDisplayStatus(borrower);
+  const isPaid = displayStatus.className === "paid";
   const isDue = isBorrowerDueOrOverdue(borrower.dueDate);
 
   card.innerHTML = `
     <h2>${escapeHtml(borrower.name || "Borrower")}</h2>
-    <p class="nav-subtitle">NRC: ${escapeHtml(borrower.nrc || "-")} | Status: ${isPaid ? "Paid" : "Pending"}</p>
+    <p class="nav-subtitle">NRC: ${escapeHtml(borrower.nrc || "-")} | Status: ${displayStatus.label}</p>
     <div class="action-grid">
       <div><strong>Email:</strong> ${escapeHtml(borrower.email || "-")}</div>
       <div><strong>Phone:</strong> ${escapeHtml(borrower.phone || "-")}</div>
@@ -1271,7 +1303,7 @@ function renderSummaryAndReports() {
   const todayIso = getTodayIso();
   const totalBorrowers = borrowersCache.length;
   const pendingBorrowers = borrowersCache.filter(
-    (borrower) => borrower.status !== "paid",
+    (borrower) => getBorrowerDisplayStatus(borrower).className === "pending",
   ).length;
   const overdueBorrowers = borrowersCache.filter(
     (borrower) =>
@@ -1323,7 +1355,7 @@ window.exportReportPdf = function () {
     const todayIso = getTodayIso();
     const totalBorrowers = borrowersCache.length;
     const pendingBorrowers = borrowersCache.filter(
-      (borrower) => borrower.status !== "paid",
+      (borrower) => getBorrowerDisplayStatus(borrower).className === "pending",
     ).length;
     const overdueBorrowers = borrowersCache.filter(
       (borrower) =>
@@ -1395,7 +1427,7 @@ window.exportReportPdf = function () {
         documentPdf.addPage();
         y = 20;
       }
-      const statusLabel = borrower.status === "paid" ? "Paid" : "Pending";
+      const statusLabel = getBorrowerDisplayStatus(borrower).label;
       const row =
         `${(borrower.name || "-").slice(0, 16)} | ` +
         `${(borrower.nrc || "-").slice(0, 12)} | ` +
@@ -1416,7 +1448,6 @@ window.exportReportPdf = function () {
 
 window.exportReportCsv = function () {
   try {
-    const todayIso = getTodayIso();
     const headers = [
       "Name",
       "NRC",
@@ -1457,10 +1488,8 @@ window.exportReportCsv = function () {
       Number(borrower.totalToPay || 0).toFixed(2),
       borrower.dateBorrowed || "",
       borrower.dueDate || "",
-      borrower.status || "",
-      borrower.status !== "paid" &&
-      Boolean(borrower.dueDate) &&
-      borrower.dueDate < todayIso
+      getBorrowerDisplayStatus(borrower).label,
+      getBorrowerDisplayStatus(borrower).isOverdue
         ? "Yes"
         : "No",
       borrower.status === "paid"

@@ -930,6 +930,11 @@ body {
   color: #065f46;
 }
 
+.status-pill.overdue {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 .table-actions {
   display: flex;
   align-items: center;
