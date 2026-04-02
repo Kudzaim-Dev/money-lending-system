@@ -181,11 +181,14 @@ function openMailDraft(to, subject, body) {
 function getDateIsoAfterDays(days) {
   const date = new Date();
   date.setDate(date.getDate() + days);
-  return date.toISOString().slice(0, 10);
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return localDate.toISOString().slice(0, 10);
 }
 
 function getTodayIso() {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const localNow = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  return localNow.toISOString().slice(0, 10);
 }
 
 function getBorrowerIdFromUrl() {
@@ -766,7 +769,7 @@ function setAutoBorrowerAmounts() {
 }
 
 function getBorrowerFormValues() {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getTodayIso();
   const name = document.getElementById("borrowerName")?.value.trim() || "";
   const nrc = document.getElementById("borrowerNrc")?.value.trim() || "";
   const address = document.getElementById("borrowerAddress")?.value.trim() || "";
