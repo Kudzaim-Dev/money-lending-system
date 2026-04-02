@@ -184,6 +184,10 @@ function getDateIsoAfterDays(days) {
   return date.toISOString().slice(0, 10);
 }
 
+function getTodayIso() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 function getBorrowerIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
   return params.get("id");
@@ -1264,9 +1268,16 @@ window.draftFiveDayWhatsApp = async function () {
 };
 
 function renderSummaryAndReports() {
+  const todayIso = getTodayIso();
   const totalBorrowers = borrowersCache.length;
   const pendingBorrowers = borrowersCache.filter(
     (borrower) => borrower.status !== "paid",
+  ).length;
+  const overdueBorrowers = borrowersCache.filter(
+    (borrower) =>
+      borrower.status !== "paid" &&
+      Boolean(borrower.dueDate) &&
+      borrower.dueDate < todayIso,
   ).length;
   const paidBorrowers = borrowersCache.filter(
     (borrower) => borrower.status === "paid",
@@ -1279,6 +1290,9 @@ function renderSummaryAndReports() {
     (sum, borrower) => sum + Number(borrower.totalToPay || 0),
     0,
   );
+  const moneyRecovered = borrowersCache
+    .filter((borrower) => borrower.status === "paid")
+    .reduce((sum, borrower) => sum + Number(borrower.totalToPay || 0), 0);
   const totalInterest = borrowersCache.reduce(
     (sum, borrower) => sum + Number(borrower.interestAmount || 0),
     0,
@@ -1293,18 +1307,29 @@ function renderSummaryAndReports() {
   setText("statPendingBorrowers", pendingBorrowers);
   setText("statTotalBorrowed", formatCurrency(totalBorrowed));
   setText("statTotalExpected", formatCurrency(totalExpected));
+  setText("statMoneyRecovered", formatCurrency(moneyRecovered));
+  setText("statOverdueBorrowers", overdueBorrowers);
 
   setText("reportPaidBorrowers", paidBorrowers);
   setText("reportPendingBorrowers", pendingBorrowers);
+  setText("reportOverdueBorrowers", overdueBorrowers);
+  setText("reportMoneyRecovered", formatCurrency(moneyRecovered));
   setText("reportTotalInterest", formatCurrency(totalInterest));
   setText("reportPortfolioValue", formatCurrency(totalExpected));
 }
 
 window.exportReportPdf = function () {
   try {
+    const todayIso = getTodayIso();
     const totalBorrowers = borrowersCache.length;
     const pendingBorrowers = borrowersCache.filter(
       (borrower) => borrower.status !== "paid",
+    ).length;
+    const overdueBorrowers = borrowersCache.filter(
+      (borrower) =>
+        borrower.status !== "paid" &&
+        Boolean(borrower.dueDate) &&
+        borrower.dueDate < todayIso,
     ).length;
     const paidBorrowers = borrowersCache.filter(
       (borrower) => borrower.status === "paid",
@@ -1317,6 +1342,9 @@ window.exportReportPdf = function () {
       (sum, borrower) => sum + Number(borrower.totalToPay || 0),
       0,
     );
+    const moneyRecovered = borrowersCache
+      .filter((borrower) => borrower.status === "paid")
+      .reduce((sum, borrower) => sum + Number(borrower.totalToPay || 0), 0);
     const totalInterest = borrowersCache.reduce(
       (sum, borrower) => sum + Number(borrower.interestAmount || 0),
       0,
@@ -1346,7 +1374,9 @@ window.exportReportPdf = function () {
     addLine("Total Borrowers", String(totalBorrowers));
     addLine("Paid Borrowers", String(paidBorrowers));
     addLine("Pending Borrowers", String(pendingBorrowers));
+    addLine("Over Due Borrowers", String(overdueBorrowers));
     addLine("Total Borrowed", formatCurrency(totalBorrowed));
+    addLine("Money Recovered", formatCurrency(moneyRecovered));
     addLine("Total Interest", formatCurrency(totalInterest));
     addLine("Expected Collection", formatCurrency(totalExpected));
 
@@ -1386,6 +1416,7 @@ window.exportReportPdf = function () {
 
 window.exportReportCsv = function () {
   try {
+    const todayIso = getTodayIso();
     const headers = [
       "Name",
       "NRC",
@@ -1399,6 +1430,8 @@ window.exportReportCsv = function () {
       "Date Borrowed",
       "Due Date",
       "Status",
+      "Is Over Due",
+      "Recovered Amount (ZMW)",
       "Last Communication Channel",
       "Last Communication Type",
       "Last Communication At",
@@ -1425,6 +1458,14 @@ window.exportReportCsv = function () {
       borrower.dateBorrowed || "",
       borrower.dueDate || "",
       borrower.status || "",
+      borrower.status !== "paid" &&
+      Boolean(borrower.dueDate) &&
+      borrower.dueDate < todayIso
+        ? "Yes"
+        : "No",
+      borrower.status === "paid"
+        ? Number(borrower.totalToPay || 0).toFixed(2)
+        : "0.00",
       borrower.lastCommunicationChannel || "",
       borrower.lastCommunicationType || "",
       formatTimestampLabel(borrower.lastCommunicationAt),
