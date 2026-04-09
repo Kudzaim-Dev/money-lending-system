@@ -1035,6 +1035,18 @@ window.markBorrowerPaid = async function (borrowerId) {
   }
 };
 
+window.undoBorrowerPaid = async function (borrowerId) {
+  try {
+    await updateDoc(doc(db, "borrowers", borrowerId), {
+      status: "pending",
+      updatedAt: serverTimestamp(),
+    });
+    setAppStatus("Borrower moved back to pending.", "ok");
+  } catch (error) {
+    setAppStatus(`Error updating status: ${error.message}`, "error", true);
+  }
+};
+
 window.deleteBorrowerRecord = async function (borrowerId) {
   const confirmed = window.confirm("Delete this borrower record?");
   if (!confirmed) return;
@@ -1133,7 +1145,11 @@ function renderBorrowersTable() {
             <div class="table-actions">
               <button type="button" class="table-btn edit" onclick="startBorrowerEdit('${borrower.id}')">Edit</button>
               <button type="button" class="table-btn manage" onclick="openBorrowerActions('${borrower.id}')">Manage</button>
-              <button type="button" class="table-btn paid" onclick="markBorrowerPaid('${borrower.id}')" ${isPaid ? "disabled" : ""}>Mark Paid</button>
+              ${
+                isPaid
+                  ? `<button type="button" class="table-btn paid" onclick="undoBorrowerPaid('${borrower.id}')">Undo Paid</button>`
+                  : `<button type="button" class="table-btn paid" onclick="markBorrowerPaid('${borrower.id}')">Mark Paid</button>`
+              }
             </div>
           </td>
         </tr>
@@ -1165,7 +1181,11 @@ function renderBorrowerActionCard(borrower) {
     </div>
     <div class="action-buttons-wrap">
       <button type="button" class="table-btn edit" onclick="window.location.href='dashboard.html'">Back to Edit</button>
-      <button type="button" class="table-btn paid" onclick="markBorrowerPaid('${borrower.id}')" ${isPaid ? "disabled" : ""}>Mark Paid</button>
+      ${
+        isPaid
+          ? `<button type="button" class="table-btn paid" onclick="undoBorrowerPaid('${borrower.id}')">Undo Paid</button>`
+          : `<button type="button" class="table-btn paid" onclick="markBorrowerPaid('${borrower.id}')">Mark Paid</button>`
+      }
       <button type="button" class="table-btn welcome" onclick="sendWelcomeEmailDraft('${borrower.id}')">Email Welcome</button>
       <button type="button" class="table-btn whatsapp" onclick="sendWelcomeWhatsAppDraft('${borrower.id}')">WA Welcome</button>
       ${
@@ -1304,6 +1324,7 @@ window.draftFiveDayWhatsApp = async function () {
 
 function renderSummaryAndReports() {
   const todayIso = getTodayIso();
+  const dueSoonIso = getDateIsoAfterDays(5);
   const totalBorrowers = borrowersCache.length;
   const pendingBorrowers = borrowersCache.filter(
     (borrower) => getBorrowerDisplayStatus(borrower).className === "pending",
@@ -1316,6 +1337,15 @@ function renderSummaryAndReports() {
   ).length;
   const paidBorrowers = borrowersCache.filter(
     (borrower) => borrower.status === "paid",
+  ).length;
+  const dueSoonBorrowers = borrowersCache.filter(
+    (borrower) =>
+      borrower.status !== "paid" &&
+      Boolean(borrower.dueDate) &&
+      borrower.dueDate === dueSoonIso,
+  );
+  const borrowersWithFullContact = borrowersCache.filter(
+    (borrower) => borrower.email?.trim() && borrower.phone?.trim(),
   ).length;
   const totalBorrowed = borrowersCache.reduce(
     (sum, borrower) => sum + Number(borrower.amountBorrowed || 0),
@@ -1332,6 +1362,16 @@ function renderSummaryAndReports() {
     (sum, borrower) => sum + Number(borrower.interestAmount || 0),
     0,
   );
+  const dueSoonValue = dueSoonBorrowers.reduce(
+    (sum, borrower) => sum + Number(borrower.totalToPay || 0),
+    0,
+  );
+  const collectionRate =
+    totalExpected > 0 ? Math.round((moneyRecovered / totalExpected) * 100) : 0;
+  const contactCoverage =
+    totalBorrowers > 0
+      ? Math.round((borrowersWithFullContact / totalBorrowers) * 100)
+      : 0;
 
   const setText = (id, value) => {
     const element = document.getElementById(id);
@@ -1351,6 +1391,28 @@ function renderSummaryAndReports() {
   setText("reportMoneyRecovered", formatCurrency(moneyRecovered));
   setText("reportTotalInterest", formatCurrency(totalInterest));
   setText("reportPortfolioValue", formatCurrency(totalExpected));
+
+  setText("collectionRate", `${collectionRate}%`);
+  setText(
+    "collectionRateMeta",
+    totalExpected > 0
+      ? `${formatCurrency(moneyRecovered)} recovered out of ${formatCurrency(totalExpected)} expected.`
+      : "Paid loans compared to your full portfolio.",
+  );
+  setText("dueSoonCount", dueSoonBorrowers.length);
+  setText(
+    "dueSoonValue",
+    dueSoonBorrowers.length > 0
+      ? `${formatCurrency(dueSoonValue)} due on ${formatDateLabel(dueSoonIso)}.`
+      : "No pending borrowers are due in 5 days.",
+  );
+  setText("contactCoverage", `${contactCoverage}%`);
+  setText(
+    "contactCoverageMeta",
+    totalBorrowers > 0
+      ? `${borrowersWithFullContact} of ${totalBorrowers} borrowers have both phone and email on file.`
+      : "Borrowers with both phone and email available.",
+  );
 }
 
 window.exportReportPdf = function () {

@@ -58,6 +58,33 @@
 
       <div class="dashboard-content">
         <section id="sectionDashboard" class="panel-section hidden-section">
+          <section class="hero-overview">
+            <div class="hero-overview__content">
+              <p class="eyebrow hero-overview__eyebrow">Portfolio overview</p>
+              <h2>Track lending performance at a glance</h2>
+              <p class="hero-overview__copy">
+                Review collections, identify overdue accounts, and jump straight
+                into the actions your team uses most.
+              </p>
+            </div>
+            <div class="hero-overview__actions">
+              <button
+                type="button"
+                class="primary-action-btn"
+                onclick="switchDashboardSection('borrowers')"
+              >
+                Add or Update Borrower
+              </button>
+              <button
+                type="button"
+                class="secondary-btn dashboard-ghost-btn"
+                onclick="switchDashboardSection('reports')"
+              >
+                View Reports
+              </button>
+            </div>
+          </section>
+
           <div class="stats-grid">
             <div class="stat-card">
               <h3>Total Borrowers</h3>
@@ -84,6 +111,85 @@
               <p id="statOverdueBorrowers">0</p>
             </div>
           </div>
+
+          <section class="overview-grid">
+            <div class="overview-card">
+              <div class="overview-card__header">
+                <h3>Collections Health</h3>
+                <span class="overview-badge">Live</span>
+              </div>
+              <p class="overview-card__value" id="collectionRate">0%</p>
+              <p class="overview-card__meta" id="collectionRateMeta">
+                Paid loans compared to your full portfolio.
+              </p>
+            </div>
+
+            <div class="overview-card">
+              <div class="overview-card__header">
+                <h3>Due in 5 Days</h3>
+                <span class="overview-badge overview-badge--warn">Follow up</span>
+              </div>
+              <p class="overview-card__value" id="dueSoonCount">0</p>
+              <p class="overview-card__meta" id="dueSoonValue">
+                Borrowers that need proactive reminders.
+              </p>
+            </div>
+
+            <div class="overview-card">
+              <div class="overview-card__header">
+                <h3>Borrower Contacts</h3>
+                <span class="overview-badge overview-badge--neutral">Quality</span>
+              </div>
+              <p class="overview-card__value" id="contactCoverage">0%</p>
+              <p class="overview-card__meta" id="contactCoverageMeta">
+                Borrowers with both phone and email available.
+              </p>
+            </div>
+          </section>
+
+          <section class="quick-actions-panel">
+            <div>
+              <h2>Quick Actions</h2>
+              <p class="nav-subtitle">
+                Use the existing borrower data to move faster without changing
+                your records.
+              </p>
+            </div>
+            <div class="quick-actions-grid">
+              <button
+                type="button"
+                class="quick-action-btn"
+                onclick="switchDashboardSection('borrowers')"
+              >
+                <strong>Manage Borrowers</strong>
+                <span>Edit records, update payments, and open borrower actions.</span>
+              </button>
+              <button
+                type="button"
+                class="quick-action-btn"
+                onclick="draftFiveDayReminders()"
+              >
+                <strong>Draft Reminder Emails</strong>
+                <span>Prepare 5-day due reminders for borrowers with email addresses.</span>
+              </button>
+              <button
+                type="button"
+                class="quick-action-btn"
+                onclick="draftFiveDayWhatsApp()"
+              >
+                <strong>Draft WhatsApp Follow-ups</strong>
+                <span>Open WhatsApp and copy ready-to-send reminder links.</span>
+              </button>
+              <button
+                type="button"
+                class="quick-action-btn"
+                onclick="exportReportCsv()"
+              >
+                <strong>Export Portfolio CSV</strong>
+                <span>Download the current portfolio without changing any borrower data.</span>
+              </button>
+            </div>
+          </section>
 
           <section class="account-section">
             <div class="account-section-header">
@@ -178,7 +284,18 @@
 
         <section id="sectionBorrowers" class="panel-section">
           <section class="add-loan-section">
-          <h2>Borrowers</h2>
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow section-heading__eyebrow">Borrower management</p>
+              <h2>Borrowers</h2>
+              <p class="nav-subtitle">
+                Add new records, edit existing ones, and keep calculations accurate automatically.
+              </p>
+            </div>
+            <div class="section-heading__badge">
+              Shared workspace syncing is active
+            </div>
+          </div>
           <div class="borrower-form-grid">
             <input type="text" id="borrowerName" placeholder="Full Name" required />
             <input
@@ -242,6 +359,15 @@
           </section>
 
           <section class="loans-section">
+          <div class="section-heading section-heading--compact">
+            <div>
+              <p class="eyebrow section-heading__eyebrow">Borrower records</p>
+              <h2>Portfolio Table</h2>
+              <p class="nav-subtitle">
+                Search and filter your existing borrower data in real time.
+              </p>
+            </div>
+          </div>
           <div class="filters-grid">
             <input
               type="text"
