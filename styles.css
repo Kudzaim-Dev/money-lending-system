@@ -72,8 +72,8 @@ body {
   letter-spacing: 0.08em;
   font-size: 12px;
   font-weight: 800;
-  color: #bfdbfe;
-  text-shadow: 0 2px 10px rgba(2, 6, 23, 0.65);
+  color: #0a66c2;
+  text-shadow: none;
 }
 
 .auth-page {
@@ -700,8 +700,8 @@ body {
   max-width: 62ch;
   color: var(--muted);
   line-height: 1.6;
+  font-size: 15px;
 }
-
 .hero-overview__actions {
   display: flex;
   gap: 10px;
@@ -832,6 +832,10 @@ body {
   color: var(--muted);
   line-height: 1.5;
   font-size: 13px;
+}
+.section-heading h2,
+.reports-header h2 {
+  letter-spacing: -0.02em;
 }
 
 .account-section {
@@ -1454,11 +1458,15 @@ body {
 
   .navbar {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     width: min(100%, 94%);
     margin-top: 12px;
-    padding: 16px;
-    border-radius: 14px;
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .nav-brand-wrap {
+    width: 100%;
   }
 
   .nav-brand-wrap h1 {
@@ -1477,7 +1485,7 @@ body {
   .logout-btn {
     width: 100%;
     min-height: 46px;
-    font-size: 15px;
+    font-size: 14px;
     text-align: center;
   }
 
@@ -1486,14 +1494,46 @@ body {
     margin: 14px auto 28px;
   }
 
+  .hero-overview {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .hero-overview__content h2 {
+    font-size: 24px;
+    line-height: 1.15;
+  }
+
+  .hero-overview__copy,
+  .overview-card__meta,
+  .quick-action-btn span,
+  .nav-subtitle {
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .hero-overview__actions {
+    gap: 8px;
+  }
+
+  .hero-overview__actions .primary-action-btn,
+  .hero-overview__actions .dashboard-ghost-btn {
+    width: 100%;
+    text-align: center;
+  }
+
   .stats-grid {
     grid-template-columns: 1fr;
+    gap: 10px;
   }
 
   .stat-card,
+  .overview-card,
+  .quick-actions-panel,
   .account-section,
   .add-loan-section,
-  .loans-section {
+  .loans-section,
+  .borrower-action-card {
     padding: 16px;
     border-radius: 14px;
   }
@@ -1502,8 +1542,15 @@ body {
     font-size: 28px;
   }
 
+  .overview-card__value {
+    font-size: 26px;
+  }
+
   .account-section h2,
-  .change-password-card h3 {
+  .change-password-card h3,
+  .quick-actions-panel h2,
+  .section-heading h2,
+  .reports-header h2 {
     font-size: 22px;
   }
 
@@ -1513,11 +1560,24 @@ body {
 
   .borrower-form-grid {
     grid-template-columns: 1fr;
+    gap: 10px;
   }
 
   .add-loan-section h2 {
     font-size: 30px;
     margin-bottom: 10px;
+  }
+
+  .section-heading,
+  .section-heading--compact,
+  .reports-header {
+    gap: 10px;
+  }
+
+  .section-heading__badge {
+    width: 100%;
+    border-radius: 12px;
+    text-align: center;
   }
 
   .borrower-form-grid input,
@@ -1536,9 +1596,14 @@ body {
   .borrower-form-actions button,
   .primary-action-btn,
   .password-clear-btn,
-  .table-btn {
+  .table-btn,
+  .export-pdf-btn,
+  .export-csv-btn,
+  .draft-reminders-btn,
+  .draft-whatsapp-btn {
     width: 100%;
     justify-content: center;
+    text-align: center;
   }
 
   .filters-grid {
@@ -1547,19 +1612,11 @@ body {
 
   .reports-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
   }
 
   .reports-header > * {
     width: 100%;
-  }
-
-  .export-pdf-btn,
-  .export-csv-btn,
-  .draft-reminders-btn,
-  .draft-whatsapp-btn {
-    width: 100%;
-    text-align: center;
   }
 
   .account-section-header {
@@ -1569,6 +1626,16 @@ body {
   .account-admin-badge {
     min-width: 0;
     width: 100%;
+  }
+
+  .table-wrap {
+    border-radius: 14px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .borrowers-table {
+    min-width: 860px;
   }
 
   .action-grid {
@@ -1621,16 +1688,46 @@ body {
     font-size: 22px;
   }
 
-  .nav-subtitle {
+  .brand-panel h1,
+  .hero-overview__content h2 {
+    font-size: 22px;
+  }
+
+  .brand-copy,
+  .hero-overview__copy,
+  .overview-card__meta,
+  .quick-action-btn span,
+  .form-subtitle,
+  .selected-admin-email {
     font-size: 13px;
+  }
+
+  .auth-container,
+  .hero-overview,
+  .quick-actions-panel,
+  .overview-card,
+  .stat-card,
+  .account-section,
+  .add-loan-section,
+  .loans-section,
+  .change-password-card,
+  .borrower-action-card {
+    border-radius: 12px;
   }
 
   .stat-card,
   .account-section,
   .add-loan-section,
   .loans-section,
-  .change-password-card {
+  .change-password-card,
+  .overview-card,
+  .quick-actions-panel,
+  .hero-overview {
     padding: 14px;
+  }
+
+  .overview-card__value {
+    font-size: 24px;
   }
 
   .borrowers-table th,
