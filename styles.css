@@ -129,8 +129,8 @@ body {
   width: min(1120px, 92%);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) 420px;
-  gap: 42px;
+  grid-template-columns: minmax(0, 1.2fr) 440px;
+  gap: 48px;
   align-items: center;
   padding: 52px 0;
 }
@@ -203,19 +203,55 @@ body {
 }
 
 .auth-container {
-  background: rgba(255, 255, 255, 0.82);
-  border-radius: 24px;
-  border: 1px solid rgba(203, 213, 225, 0.82);
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.62),
+    rgba(255, 255, 255, 0.36)
+  );
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
   overflow: hidden;
-  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.12);
-  backdrop-filter: blur(18px);
+  box-shadow:
+    0 30px 60px rgba(15, 23, 42, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  transform: translateY(0);
+  animation: auth-float-in 0.8s ease;
+}
+
+.auth-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.65), transparent 34%),
+    linear-gradient(135deg, rgba(10, 102, 194, 0.08), rgba(15, 118, 110, 0.05));
+  pointer-events: none;
+}
+
+.auth-container::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+  pointer-events: none;
 }
 
 .auth-tabs {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  background: rgba(241, 245, 249, 0.82);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.95);
+  margin: 18px 18px 0;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 18px;
 }
 
 .auth-tabs.single-tab {
@@ -223,52 +259,67 @@ body {
 }
 
 .tab-btn {
-  padding: 18px;
+  padding: 14px 18px;
   background: transparent;
   border: none;
+  border-radius: 14px;
   color: #475569;
   font-weight: 700;
   cursor: pointer;
-  transition: 0.25s ease;
+  transition:
+    transform 0.22s ease,
+    background-color 0.22s ease,
+    color 0.22s ease,
+    box-shadow 0.22s ease;
 }
 
 .tab-btn.active {
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.9);
   color: #0f172a;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
 }
 
 .auth-form {
+  position: relative;
+  z-index: 1;
   display: none;
-  padding: 32px;
+  padding: 30px 30px 32px;
 }
 
 .auth-form.active {
   display: block;
-  animation: slide-fade-in 0.35s ease;
+  animation: auth-form-reveal 0.55s ease;
 }
 
 .auth-form h2 {
-  font-size: 29px;
+  font-size: 30px;
   color: #0f172a;
   letter-spacing: -0.03em;
+  text-align: left;
 }
 
 .form-subtitle {
   margin-top: 8px;
   color: #64748b;
   font-size: 14px;
+  line-height: 1.6;
 }
 
 .auth-form input {
   width: 100%;
   margin-top: 12px;
-  border: 1px solid #dbe4ee;
-  border-radius: 12px;
-  padding: 13px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 16px;
+  padding: 14px 16px;
   font-size: 14px;
   color: #0f172a;
-  background: rgba(255, 255, 255, 0.96);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .auth-form input::placeholder {
@@ -276,18 +327,18 @@ body {
 }
 
 .admin-profiles {
-  margin-top: 14px;
+  margin-top: 16px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 
 .admin-profile-btn {
-  border: 1px solid #dbe4ee;
-  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.5);
   color: #334155;
-  border-radius: 12px;
-  padding: 12px;
+  border-radius: 16px;
+  padding: 14px 12px;
   cursor: pointer;
   font-weight: 700;
   transition:
@@ -309,15 +360,20 @@ body {
 }
 
 .selected-admin-email {
-  margin-top: 10px;
+  margin-top: 12px;
   font-size: 13px;
-  color: #64748b;
+  color: #475569;
+  line-height: 1.5;
 }
 
 .auth-form input:focus {
   outline: none;
-  border-color: #93c5fd;
-  box-shadow: 0 0 0 4px rgba(219, 234, 254, 0.95);
+  border-color: rgba(147, 197, 253, 0.95);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow:
+    0 0 0 4px rgba(219, 234, 254, 0.75),
+    0 10px 24px rgba(10, 102, 194, 0.08);
+  transform: translateY(-1px);
 }
 
 .password-field {
@@ -468,16 +524,19 @@ body {
 
 .auth-form button {
   width: 100%;
-  margin-top: 12px;
+  margin-top: 14px;
   border: none;
-  border-radius: 12px;
-  padding: 13px;
+  border-radius: 16px;
+  padding: 14px;
   background: linear-gradient(135deg, var(--primary), #3182ce);
   color: white;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .auth-form button:disabled {
@@ -1339,6 +1398,28 @@ body {
   }
 }
 
+@keyframes auth-float-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes auth-form-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes borrower-spin {
   from {
     transform: rotate(0deg);
@@ -1353,7 +1434,7 @@ body {
     grid-template-columns: 1fr;
     width: min(600px, 92%);
     padding: 34px 0;
-    gap: 22px;
+    gap: 24px;
   }
 
   .brand-panel {
@@ -1362,6 +1443,9 @@ body {
 
   .auth-container {
     order: 1;
+    max-width: 520px;
+    width: 100%;
+    margin: 0 auto;
   }
 
   .stats-grid {
@@ -1428,11 +1512,15 @@ body {
   }
 
   .auth-container {
-    border-radius: 16px;
+    border-radius: 22px;
+  }
+
+  .auth-tabs {
+    margin: 14px 14px 0;
   }
 
   .auth-form {
-    padding: 22px 18px;
+    padding: 24px 20px 22px;
   }
 
   .auth-form h2 {
@@ -1659,7 +1747,7 @@ body {
   }
 
   .auth-form {
-    padding: 20px 16px;
+    padding: 22px 16px 18px;
   }
 
   .password-field input {
