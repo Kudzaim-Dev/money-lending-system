@@ -21,87 +21,42 @@
     >
       Checking app connection...
     </div>
-    <div class="dashboard-layout">
-      <aside class="sidebar">
-        <div class="sidebar-header">
-          <div class="nav-brand-wrap">
-            <h1>Money Lending Management</h1>
-            <p class="nav-subtitle">Small business loan tracking</p>
-          </div>
+    <div class="dashboard">
+      <nav class="navbar">
+        <div class="nav-brand-wrap">
+          <h1>Money Lending Management</h1>
+          <p class="nav-subtitle">Small business loan tracking</p>
         </div>
-        <nav class="sidebar-nav">
+        <div class="nav-links">
           <button
-            class="sidebar-nav-item"
+            class="nav-link-btn"
             id="tabDashboard"
             type="button"
             onclick="switchDashboardSection('dashboard')"
           >
-            <span class="sidebar-nav-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 19V9h4v10H5Z" />
-                <path d="M11 19V5h4v14h-4Z" />
-                <path d="M17 19v-6h4v6h-4Z" />
-              </svg>
-            </span>
-            <span>Dashboard</span>
+            Dashboard
           </button>
           <button
-            class="sidebar-nav-item active"
+            class="nav-link-btn active"
             id="tabBorrowers"
             type="button"
             onclick="switchDashboardSection('borrowers')"
           >
-            <span class="sidebar-nav-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-                <path d="M20 8v1a4 4 0 0 1-4 4h-1" />
-                <path d="M20 8a4 4 0 0 0-4-4h-1" />
-              </svg>
-            </span>
-            <span>Borrowers</span>
+            Borrowers
           </button>
           <button
-            class="sidebar-nav-item"
+            class="nav-link-btn"
             id="tabReports"
             type="button"
             onclick="switchDashboardSection('reports')"
           >
-            <span class="sidebar-nav-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 19h16" />
-                <path d="M8 15l3-3 4 4 5-5" />
-                <path d="M4 11h4" />
-                <path d="M4 7h2" />
-              </svg>
-            </span>
-            <span>Reports</span>
+            Reports
           </button>
-        </nav>
-        <div class="sidebar-rights">
-          <p class="rights-title">Web App Rights</p>
-          <ul class="rights-list">
-            <li>Dashboard access</li>
-            <li>Borrower management</li>
-            <li>Report export rights</li>
-          </ul>
+          <button onclick="logout()" class="logout-btn">Logout</button>
         </div>
-        <div class="sidebar-footer">
-          <button onclick="logout()" class="sidebar-logout-btn">
-            <span class="sidebar-nav-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <path d="M16 17l5-5-5-5" />
-                <path d="M21 12H9" />
-              </svg>
-            </span>
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
+      </nav>
 
-      <main class="main-content">
-        <div class="dashboard-content">
+      <div class="dashboard-content">
         <section id="sectionDashboard" class="panel-section hidden-section">
           <section class="hero-overview">
             <div class="hero-overview__content">
@@ -233,29 +188,6 @@
                 <strong>Export Portfolio CSV</strong>
                 <span>Download the current portfolio without changing any borrower data.</span>
               </button>
-            </div>
-          </section>
-
-          <section class="automation-section">
-            <div class="automation-card">
-              <div class="automation-card__header">
-                <div>
-                  <p class="eyebrow">System automation</p>
-                  <h2>Automate reminders and reports</h2>
-                </div>
-                <span class="automation-badge">Smart workflow</span>
-              </div>
-              <p class="automation-copy">
-                Keep your portfolio updated with automated due-date scanning and email summaries. Use one click to prepare the next batch of borrower reminders.
-              </p>
-              <div class="automation-actions">
-                <button type="button" class="primary-action-btn" onclick="runAutoReminderScan()">
-                  Scan Due Reminders
-                </button>
-                <button type="button" class="dashboard-ghost-btn" onclick="prepareDailySummaryEmail()">
-                  Draft Daily Summary
-                </button>
-              </div>
             </div>
           </section>
 
@@ -535,7 +467,6 @@
           </section>
         </section>
       </div>
-    </main>
     </div>
 
     <script type="module" src="app.js?v=2026.04.02.2"></script>
