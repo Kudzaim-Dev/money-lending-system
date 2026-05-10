@@ -178,6 +178,13 @@ function openMailDraft(to, subject, body) {
   window.location.href = mailtoLink;
 }
 
+function openMailDraftWithoutRecipient(subject, body) {
+  const mailtoLink =
+    `mailto:?subject=${encodeURIComponent(subject)}` +
+    `&body=${encodeURIComponent(body)}`;
+  window.location.href = mailtoLink;
+}
+
 function getDateIsoAfterDays(days) {
   const date = new Date();
   date.setDate(date.getDate() + days);
@@ -1317,6 +1324,85 @@ window.draftFiveDayWhatsApp = async function () {
     copied
       ? `Opened WhatsApp for first borrower. ${dueSoon.length} reminder links copied to clipboard.`
       : `Opened WhatsApp for first borrower. ${dueSoon.length} reminders ready.`,
+    "ok",
+    true,
+  );
+};
+
+window.prepareDailySummaryEmail = function () {
+  const todayIso = getTodayIso();
+  const dueSoonDate = getDateIsoAfterDays(5);
+  const totalBorrowers = borrowersCache.length;
+  const pendingBorrowers = borrowersCache.filter(
+    (borrower) => getBorrowerDisplayStatus(borrower).className === "pending",
+  ).length;
+  const overdueBorrowers = borrowersCache.filter(
+    (borrower) =>
+      borrower.status !== "paid" &&
+      Boolean(borrower.dueDate) &&
+      borrower.dueDate < todayIso,
+  ).length;
+  const paidBorrowers = borrowersCache.filter(
+    (borrower) => borrower.status === "paid",
+  ).length;
+  const dueSoonBorrowers = borrowersCache.filter(
+    (borrower) =>
+      borrower.status !== "paid" &&
+      Boolean(borrower.dueDate) &&
+      borrower.dueDate === dueSoonDate,
+  );
+
+  const lines = [
+    `Daily lending summary for ${new Date().toLocaleDateString()}`,
+    "",
+    `Total borrowers: ${totalBorrowers}`,
+    `Paid borrowers: ${paidBorrowers}`,
+    `Pending borrowers: ${pendingBorrowers}`,
+    `Overdue borrowers: ${overdueBorrowers}`,
+    `Borrowers due in 5 days: ${dueSoonBorrowers.length}`,
+    "",
+    `Portfolio value: ${formatCurrency(
+      borrowersCache.reduce((sum, borrower) => sum + Number(borrower.totalToPay || 0), 0),
+    )}`,
+  ];
+
+  if (dueSoonBorrowers.length > 0) {
+    lines.push("\nBorrowers due soon:");
+    dueSoonBorrowers.slice(0, 8).forEach((borrower) => {
+      lines.push(
+        `- ${borrower.name || "Borrower"} | Due ${borrower.dueDate} | ${formatCurrency(
+          borrower.totalToPay,
+        )}`,
+      );
+    });
+    if (dueSoonBorrowers.length > 8) {
+      lines.push(`...and ${dueSoonBorrowers.length - 8} more borrowers`);
+    }
+  }
+
+  openMailDraftWithoutRecipient(
+    `Daily Lending Summary - ${new Date().toLocaleDateString()}`,
+    lines.join("\n"),
+  );
+  setAppStatus("Daily summary draft opened in your mail client.", "ok", true);
+};
+
+window.runAutoReminderScan = function () {
+  const targetDueDate = getDateIsoAfterDays(5);
+  const dueSoonBorrowers = borrowersCache.filter(
+    (borrower) =>
+      borrower.status !== "paid" &&
+      borrower.dueDate === targetDueDate &&
+      (borrower.email || borrower.phone),
+  );
+
+  if (dueSoonBorrowers.length === 0) {
+    setAppStatus("No borrowers are due in 5 days.", "info", true);
+    return;
+  }
+
+  setAppStatus(
+    `Auto scan found ${dueSoonBorrowers.length} borrowers due on ${targetDueDate}. Use the reminder actions to contact them quickly.`,
     "ok",
     true,
   );
